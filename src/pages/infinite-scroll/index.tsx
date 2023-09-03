@@ -1,6 +1,5 @@
 import {useState} from 'react';
 import InfiniteScroll  from "react-infinite-scroller"
-import {List} from "postcss/lib/list";
 
 type ListItem = {
     page: number
@@ -8,39 +7,33 @@ type ListItem = {
 }
 
 export default function Index() {
-    const [list, setList] = useState<ListItem[]>([]);          //表示するデータ
-    const [hasMore, setHasMore] = useState(true);  //再読み込み判定
+    const [list, setList] = useState<ListItem[]>([]);
+    const [hasMore, setHasMore] = useState(true);
 
-    //項目を読み込むときのコールバック
+    // 項目を読み込むときのコールバック
     const loadMore = async (page: number) => {
-
-        const response = await fetch(`http://localhost:3000/api/hello?page=${page}`);  //API通信
+        const response = await fetch(`http://localhost:3000/api/hello?page=${page}`);  // API通信
         const data = await response.json() as ListItem;  // 取得データ
 
-
-
-        //データ件数が0件の場合、処理終了
+        // データ件数が0件の場合、処理終了
         if (data.numbers.length < 1) {
             setHasMore(false);
             return;
         }
 
-        if (page !== 1) {
-            // 例えばpage 2を取得した時 page 1を削除したい
-            const deleteTargetIndex = data.page - 1;
-
-            const newList = [...list, data]
-
-            const filteredNewList = newList.filter(item => item.page === deleteTargetIndex)
-
-            setList(filteredNewList);
+        if (list.length >= 2) {
+            const newList = list.splice(list.length - 2, 1)
+            setList(newList)
+            window.scroll({
+                top: 0
+            })
         }
 
-        if (page === 1) {
+        if (list.length <= 1) {
             setList([...list, data]);
         }
 
-        console.log(list)
+        console.log(list.length)
     }
 
     //各スクロール要素
@@ -53,7 +46,6 @@ export default function Index() {
             </ul>
         )
     }
-
 
     //全体のスタイル
     const root_style = {
